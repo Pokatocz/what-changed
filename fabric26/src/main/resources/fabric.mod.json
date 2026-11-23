@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "whatchanged",
+  "version": "${version}",
+  "name": "What Changed?",
+  "description": "Automatic modpack changelog. After every modpack update it shows exactly which mods, items, mobs, recipes, biomes, structures, enchantments and dimensions were added, removed or changed.",
+  "authors": ["pokato"],
+  "license": "MIT",
+  "icon": "assets/whatchanged/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main":   ["com.pokato.whatchanged.fabric26.WhatChangedFabric"],
+    "client": ["com.pokato.whatchanged.fabric26.WhatChangedFabricClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "minecraft":    ">=26.1",
+    "java":         ">=25",
+    "fabric-api":   "*",
+    "fabric-key-mapping-api-v1": "*"
+  }
+}

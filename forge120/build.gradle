@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+}
+// Forge 1.20 - 1.20.4 (Forge 46 - 49) run with SRG member names. Common code + loader glue are built against
+// 1.20.1 and reobfuscated by ForgeGradle; the version shims are compiled against their own Minecraft versions
+// and remapped to SRG by ../build-shims.sh, then added to the reobfuscated JAR. Java 17.
+version = project.mod_version
+group = 'com.pokato'
+base { archivesName = 'whatchanged-forge-1.20-1.20.4' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../forge-legacy/src/main/java' }
+sourceSets.main.resources { srcDir '../common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    runs {
+        client { workingDirectory project.file('run') }
+        server { workingDirectory project.file('runserver') }
+    }
+}
+
+repositories { mavenCentral() }
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.10' }
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("META-INF/mods.toml") { expand "version": project.version }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }
+jar { from('../LICENSE') }
+
+def shims = ['c120', 'c1202', 'g120', 'gscreen', 'g1202', 'g1203']
+jar.finalizedBy('reobfJar')
+tasks.register('injectShims') {
+    dependsOn 'reobfJar'
+    doLast {
+        def out = jar.archiveFile.get().asFile
+        shims.each { s ->
+            def d = file("../shims/build/srg/$s")
+            if (!d.isDirectory()) throw new GradleException("missing shim $s - run ../build-shims.sh first")
+            ant.zip(destfile: out, update: true) { fileset(dir: d) }
+        }
+    }
+}
+build.dependsOn 'injectShims'

@@ -1,0 +1,43 @@
+plugins {
+    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'java'
+}
+// Fabric 1.20 - 1.21.7. Common code + loader glue are built against 1.20.1 (Mojang mappings, Loom remaps to
+// intermediary). The version shims are compiled against their own Minecraft versions and remapped to
+// intermediary by ../build-shims.sh, then added to the remapped JAR. Java 17 bytecode (1.20 - 1.20.4 run on 17).
+version = project.mod_version
+group = 'com.pokato'
+base { archivesName = 'whatchanged-fabric-1.20-1.21.7' }
+
+sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../fabric-common/src/main/java'; srcDir '../fabric121/src/main/java' }
+sourceSets.main.resources { srcDir '../common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:1.20.1"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:0.16.14"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.92.12+1.20.1"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.encoding = "UTF-8"; it.options.release = 17 }
+jar { from('../LICENSE') }
+
+def shims = ['c120', 'c1202', 'c1205', 'c1212', 'c1215', 'g120', 'gscreen', 'g1202', 'g1203', 'g1212', 'client121']
+remapJar {
+    doLast {
+        def out = archiveFile.get().asFile
+        shims.each { s ->
+            def d = file("../shims/build/intermediary/$s")
+            if (!d.isDirectory()) throw new GradleException("missing shim $s - run ../build-shims.sh first")
+            ant.zip(destfile: out, update: true) { fileset(dir: d) }
+        }
+    }
+}

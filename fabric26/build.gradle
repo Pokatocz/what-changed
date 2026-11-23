@@ -1,0 +1,37 @@
+plugins {
+    // 26.1+ ships unobfuscated: non-remapping Loom
+    id 'net.fabricmc.fabric-loom' version '1.17.21'
+}
+// Fabric 26.1 - 26.3, built against 26.1.
+version = project.mod_version
+group = 'com.pokato'
+base { archivesName = 'whatchanged-fabric-26.1-26.3' }
+
+sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../shims/c1215/src/main/java'; srcDir '../client26/src/main/java'; srcDir '../fabric-common/src/main/java' }
+sourceSets.main.resources { srcDir '../common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+
+repositories { mavenCentral() }
+
+loom { mods { whatchanged { sourceSet sourceSets.main } } }
+
+dependencies {
+    minecraft "com.mojang:minecraft:26.1"
+    implementation "net.fabricmc:fabric-loader:0.19.5"
+    implementation "net.fabricmc.fabric-api:fabric-api:0.145.1+26.1"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+tasks.withType(JavaCompile).configureEach { it.options.encoding = "UTF-8"; it.options.release = 25 }
+jar { from('../LICENSE') }
+
+// Used by the Forge/NeoForge builds: compile only the 26.x client layer at Java 21 bytecode,
+// so those single JARs stay loadable on 1.21.x (Java 21) while carrying the 26.x renderer.
+tasks.register('printCompileClasspath') {
+    doLast { println "CP=" + sourceSets.main.compileClasspath.asPath }
+}

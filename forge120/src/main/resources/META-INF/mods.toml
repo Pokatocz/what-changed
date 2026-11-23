@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[46,)"
+license = "MIT"
+
+[[mods]]
+modId = "whatchanged"
+version = "${version}"
+displayName = "What Changed?"
+authors = "pokato"
+logoFile = "assets/whatchanged/icon.png"
+displayTest = "IGNORE_ALL_VERSION"
+description = '''
+Automatic modpack changelog. After every modpack update it shows exactly which mods, items, mobs, recipes, biomes, structures, enchantments and dimensions were added, removed or changed.
+'''
+
+[[dependencies.whatchanged]]
+modId = "forge"
+mandatory = true
+versionRange = "[46,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.whatchanged]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20,1.20.5)"
+ordering = "NONE"
+side = "BOTH"

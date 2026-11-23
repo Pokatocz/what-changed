@@ -1,0 +1,10 @@
+# build output – release JARs are on CurseForge
+dist/
+build/
+.gradle/
+out/
+run/
+runs/
+__pycache__/
+*.pyc
+*.class

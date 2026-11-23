@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.38,8)'
+}
+// Forge 1.20.6 - 1.21.7 (Forge 50 - 57) run with Mojang names. Common code + loader glue are built against
+// the oldest (50.x, Java 21); the version shims are compiled against their own Minecraft versions by
+// ../build-shims.sh and packed in. EventBus 6 (50 - 55) and 7 (56 - 57) are both handled by ForgeBus.
+version = project.mod_version
+group = 'com.pokato'
+base { archivesName = 'whatchanged-forge-1.20.6-1.21.7' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../forge-legacy/src/main/java' }
+sourceSets.main.resources { srcDir '../common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+
+minecraft {
+    mappings channel: 'official', version: '1.20.6'
+    runs {
+        configureEach { workingDir = layout.projectDirectory.dir('run') }
+        register('client')
+        register('server') { workingDir = layout.projectDirectory.dir('runserver') }
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:1.20.6-50.2.12')
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("META-INF/mods.toml") { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+
+def shims = ['c1205', 'c1212', 'c1215', 'gscreen', 'g1203', 'g1212', 'client121']
+jar {
+    from('../LICENSE')
+    shims.each { s -> from("../shims/build/named/$s") }
+    doFirst { shims.each { s -> if (!file("../shims/build/named/$s").isDirectory()) throw new GradleException("missing shim $s - run ../build-shims.sh first") } }
+}

@@ -1,0 +1,40 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+// NeoForge 1.20.2 - 1.21.7 in one JAR (NeoForge runs on Mojang names from 20.2). Common code + loader glue are
+// compiled against the oldest (20.2, Java 17); the version shims are compiled against their own Minecraft
+// versions by ../build-shims.sh and packed in.
+version = project.mod_version
+group = 'com.pokato'
+base { archivesName = 'whatchanged-neoforge-1.20.2-1.21.7' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets.main.java { srcDir '../common/src/main/java' }
+sourceSets.main.resources { srcDir '../common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+
+neoForge {
+    version = '20.4.251'
+    runs {
+        client { client() }
+        server { server() }
+    }
+    mods { whatchanged { sourceSet(sourceSets.main) } }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching(["META-INF/mods.toml", "META-INF/neoforge.mods.toml"]) { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }
+
+def shims = ['c1202', 'c1205', 'c1212', 'c1215', 'gscreen', 'g1202', 'g1203', 'g1212', 'client121']
+jar {
+    from('../LICENSE')
+    shims.each { s -> from("../shims/build/named/$s") }
+    doFirst { shims.each { s -> if (!file("../shims/build/named/$s").isDirectory()) throw new GradleException("missing shim $s - run ../build-shims.sh first") } }
+}
+
+tasks.register('printCompileClasspath') { doLast { println sourceSets.main.compileClasspath.asPath } }
