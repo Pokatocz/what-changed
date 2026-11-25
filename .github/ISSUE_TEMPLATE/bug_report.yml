@@ -1,0 +1,58 @@
+name: Bug report
+description: Something does not work, crashes, or a change is reported wrongly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting! The more of this you fill in, the faster it can be fixed.
+  - type: input
+    id: minecraft
+    attributes:
+      label: Minecraft version
+      placeholder: e.g. 1.21.1
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod loader
+      options: [Fabric, NeoForge, Forge]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: What Changed? version (file name)
+      placeholder: e.g. whatchanged-fabric-1.21.8-1.21.11-1.3.1.jar
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options: [Single player, Client on a server, Dedicated server, Everywhere]
+  - type: input
+    id: pack
+    attributes:
+      label: Modpack or other mods
+      description: Name and version of the modpack (and the launcher, if it matters), or the mods that might matter
+      placeholder: e.g. All the Mods 10 8.4, CurseForge app
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: For a wrong report (e.g. a mod shown as downgraded), give the old and the new version exactly as the screen shows them.
+    validations:
+      required: true
+  - type: textarea
+    id: changelog
+    attributes:
+      label: Exported changelog (optional)
+      description: If it is about the list of changes, click Export changelog (or run /whatchanged export) and paste it here. It is also saved in config/whatchanged/changelogs/.
+      render: markdown
+  - type: textarea
+    id: log
+    attributes:
+      label: Log or crash report
+      description: Upload logs/latest.log or the crash report (or paste a link to a paste site).
+      render: text
