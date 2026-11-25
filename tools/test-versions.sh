@@ -3,6 +3,6 @@
 set -e
 cd "$(dirname "$0")/.."
 OUT=$(mktemp -d)
-javac -d "$OUT" common/src/main/java/com/pokato/whatchanged/core/VersionCompare.java
+javac -d "$OUT" shared/common/src/main/java/com/pokato/whatchanged/core/VersionCompare.java
 java -cp "$OUT" tools/VersionCompareTest.java
 rm -rf "$OUT"

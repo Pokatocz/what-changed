@@ -36,39 +36,51 @@ changed – no changelog to write, no setup, works with any mods.
 | `whatchanged-forge-1.21.8-26.3-<v>.jar` | Forge 58 – 66 | 1.21.8 – 26.3 | Forge 58.1.22 (Java 21) + client26 layer |
 
 (Forge 1.20.5 and 1.21.2 do not exist. NeoForge for 1.20.1 is a fork of Forge 47: the ninth JAR,
-`whatchanged-neoforge-1.20.1-<v>.jar`, is a copy of the Forge 1.20 – 1.20.4 JAR with its own `META-INF/whatchanged-variant.txt`.)
+`whatchanged-neoforge-1.20.1-<v>.jar`, is a copy of the Forge 1.20 – 1.20.4 JAR; `tools/variants.py` gives both their own
+`META-INF/whatchanged-variant.txt` so the two files differ.)
 
 ```
-./build-all.sh                # all eight (needs JDK 17, 21, 25, JDK 8 for Forge runs, Gradle 8.14 + 9.5.1, and the
-                              # per-version Minecraft jars + mappings in $MCJARS, see build-shims.sh)
+./build-all.sh                # all nine (needs JDK 17, 21, 25, JDK 8 for Forge runs, Gradle 8.14 + 9.5.1, and the
+                              # per-version Minecraft jars + mappings in $MCJARS: tools/mcjars.py makes them)
 ./build-all.sh -Pselftest     # test builds with the dev-only in-game self-test (…-SELFTEST-….jar)
 ```
 
 The build and test scripts were written for the author's own machine: JDK and Gradle paths are set at the top of
-`build-all.sh` and in the `gradle.properties` files, mapped Minecraft jars are expected in `$MCJARS`.
+`build-all.sh` and in the `gradle.properties` files, mapped Minecraft jars are expected in `$MCJARS`. The JARs end up in
+`loaders/<project>/build/libs/`.
 
-`build-client26.sh` compiles `client26/` against Minecraft 26.1 at **Java 21 bytecode**, so the single
+`tools/build-client26.sh` compiles `shared/client26/` against Minecraft 26.1 at **Java 21 bytecode**, so the single
 Forge/NeoForge JAR stays loadable on 1.21.x while carrying the 26.x renderer layer.
 
 ## Layout
 
-- `common/` – all logic (trackers, diff, Markdown, commands, screen logic) in Mojang names, only APIs that are
+```
+loaders/   the eight Gradle builds, one per JAR (thin loader entry points)
+shared/    code used by several JARs: common logic, version shims, 1.21 / 26.x client layers
+tools/     build helpers, version-compare test, in-game test harness and self-test, release scripts
+docs/      CurseForge page text
+build-all.sh
+```
+
+- `shared/common/` – all logic (trackers, diff, Markdown, commands, screen logic) in Mojang names, only APIs that are
   identical in 1.20 – 26.3 (it is compiled against every one of them). `platform/Platform` is the per-loader bridge.
-- Version shims, one per API generation, picked at runtime by Minecraft version (`platform/Versions`):
+- Version shims in `shared/`, one per API generation, picked at runtime by Minecraft version (`platform/Versions`):
   - `core/CoreCompat` (logical server): `shims/c120` 1.20 – 1.20.1, `c1202` 1.20.2 – 1.20.4, `c1205` 1.20.5 – 1.21.1,
     `c1212` 1.21.2 – 1.21.4, `c1215` 1.21.5 – 26.x – recipe list + serialization, click events, system messages.
   - `client/ClientCompat` (client): `shims/g120` 1.20 – 1.20.1, `g1202` 1.20.2, `g1203` 1.20.3 – 1.21.1,
     `g1212` 1.21.2 – 1.21.5 (all three share `gscreen`), `client121/` 1.21.6 – 1.21.11, `client26/` 26.x.
-- `build-shims.sh` compiles each shim against its own Minecraft version and remaps it to intermediary (Fabric) and
-  SRG (Forge 1.20 – 1.20.4); `build-client26.sh` does the same for the 26.x layer.
-- `fabric-common/`, `fabric121/` (entry points, also used by the 1.20 build), `fabric26/`, `forge-legacy/`
-  (Forge 46 – 57, EventBus 6 and 7), `forge/`, `neoforge120/`, `neoforge/` – thin loader entry points;
-  `fabric120/`, `forge120/`, `forge1206/`, `neoforge120/` and the four modern projects are the Gradle builds.
+- `tools/build-shims.sh` compiles each shim against its own Minecraft version and remaps it to intermediary (Fabric)
+  and SRG (Forge 1.20 – 1.20.4); `tools/build-client26.sh` does the same for the 26.x layer.
+- Loader entry points: `shared/fabric-common/`, `loaders/fabric121/` (also used by the 1.20 build), `loaders/fabric26/`,
+  `shared/forge-legacy/` (Forge 46 – 57, EventBus 6 and 7), `loaders/forge/`, `loaders/neoforge120/`,
+  `loaders/neoforge/`. `fabric120`, `forge120` and `forge1206` only build (they reuse those entry points).
 - `core/ConfigTracker` (1.2.0) – snapshot of `config/` (TOML, JSON/JSON5, properties/INI/old Forge CFG, YAML parsed to
   flat `key = value`; other text files by normalized hash), diffed per value; secret-looking keys are stored hashed.
   `core/VersionCompare` decides update vs downgrade, `core/Loaders` maps the loader to its mod id and changelog URL.
-- `selftest/` – dev-only automated in-game test, only compiled with `-Pselftest`.
-- `tools/` – mapping merge, Gradle retry wrapper, reference verification.
+- `tools/selftest/` – dev-only automated in-game test, only compiled with `-Pselftest`.
+- `tools/` also has the mapping merge, the Gradle retry wrapper, reference verification (`verify.sh`, `refcheck.py`,
+  `verify_legacy.py`), the version-compare test (`test-versions.sh`), the in-game test harness (`ingame/`), `mcjars.py`
+  (downloads and maps the Minecraft jars the shims compile against) and `variants.py` (the NeoForge 1.20.1 copy).
 
 ## Version differences handled
 
@@ -99,7 +111,7 @@ Forge/NeoForge JAR stays loadable on 1.21.x while carrying the 26.x renderer lay
 
 ## Verified
 
-- `tools/verify_legacy.py` + `verify.sh`: every Minecraft/Mojang, Fabric API, NeoForge and Forge reference of each JAR
+- `tools/verify_legacy.py` + `tools/verify.sh`: every Minecraft/Mojang, Fabric API, NeoForge and Forge reference of each JAR
   resolved against every target version in the names that version runs with (intermediary / SRG / Mojang),
   each shim only on the versions it serves; plus overrides (a `render`/`mouseScrolled` that stops overriding) and
   lambdas implementing game or loader callbacks (name and signature).

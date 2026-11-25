@@ -1,31 +1,31 @@
 #!/bin/bash
 # build-shims.sh : compiles every version shim against the Minecraft version it targets and remaps it.
-#   shims/build/named/<shim>         Mojang names  (NeoForge 1.20.2+, Forge 1.20.6+)
-#   shims/build/intermediary/<shim>  Fabric intermediary (Fabric 1.20 - 1.21.7)
-#   shims/build/srg/<shim>           Mojang class names + SRG members (Forge 1.20 - 1.20.4)
+#   shared/shims/build/named/<shim>         Mojang names  (NeoForge 1.20.2+, Forge 1.20.6+)
+#   shared/shims/build/intermediary/<shim>  Fabric intermediary (Fabric 1.20 - 1.21.7)
+#   shared/shims/build/srg/<shim>           Mojang class names + SRG members (Forge 1.20 - 1.20.4)
 # Needs the per-version jars made by the mcjars tooling (named-<v>.jar, libsall-<v>.txt, maps/mi|ms-<v>.tiny).
 set -e
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 MC=${MCJARS:-$HOME/mcjars}
 JDK=${JDK21:-/usr/lib/jvm/java-21-openjdk-amd64}
-OUT=shims/build
+OUT=shared/shims/build
 rm -rf $OUT && mkdir -p $OUT/named $OUT/intermediary $OUT/srg $OUT/tmp
 
 # name : compile-against : source dir : extra shim sources it links against : srg?
 SPECS="
-c120:1.20.1:shims/c120::srg
-c1202:1.20.2:shims/c1202::srg
-c1205:1.20.5:shims/c1205::
-c1212:1.21.2:shims/c1212::
-c1215:1.21.5:shims/c1215::
-g120:1.20.1:shims/g120::srg
-gscreen:1.20.2:shims/gscreen::srg
-g1202:1.20.2:shims/g1202:shims/gscreen:srg
-g1203:1.20.3:shims/g1203:shims/gscreen:srg
-g1212:1.21.2:shims/g1212:shims/gscreen:
-client121:1.21.6:client121::
+c120:1.20.1:shared/shims/c120::srg
+c1202:1.20.2:shared/shims/c1202::srg
+c1205:1.20.5:shared/shims/c1205::
+c1212:1.21.2:shared/shims/c1212::
+c1215:1.21.5:shared/shims/c1215::
+g120:1.20.1:shared/shims/g120::srg
+gscreen:1.20.2:shared/shims/gscreen::srg
+g1202:1.20.2:shared/shims/g1202:shared/shims/gscreen:srg
+g1203:1.20.3:shared/shims/g1203:shared/shims/gscreen:srg
+g1212:1.21.2:shared/shims/g1212:shared/shims/gscreen:
+client121:1.21.6:shared/client121::
 "
-COMMON=$(find common/src/main/java -name '*.java')
+COMMON=$(find shared/common/src/main/java -name '*.java')
 for spec in $SPECS; do
   IFS=: read -r name v dir dep srg <<< "$spec"
   pkg=$name

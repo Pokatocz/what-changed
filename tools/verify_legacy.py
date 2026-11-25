@@ -40,7 +40,7 @@ def main():
                 skips.append(f'{label}:com/pokato/whatchanged/{pkg}/')
         libs = open(f'{MC}/libs-{v}.txt').read().strip()
         targets.append(f'{label}={MC}/{prefix}-{v}.jar' + (',' + libs if libs else ''))
-    cmd = ['python3', f'{MC}/refcheck.py', jar, owners, ','.join(skips), '--'] + targets
+    cmd = ['python3', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'refcheck.py'), jar, owners, ','.join(skips), '--'] + targets
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=MC)
     sys.stdout.write(r.stdout)
     sys.stderr.write(r.stderr)

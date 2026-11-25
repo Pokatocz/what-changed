@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """patch_release.py OLD_DIR OLD_VERSION NEW_VERSION OUT_DIR : a patch release without the full build.
 Copies every whatchanged-*-OLD_VERSION.jar from OLD_DIR to OUT_DIR as *-NEW_VERSION.jar, with
-  - com/pokato/whatchanged/core/VersionCompare.class recompiled from common/ for the class version each JAR uses
+  - com/pokato/whatchanged/core/VersionCompare.class recompiled from shared/common/ for the class version each JAR uses
     (Java 17 / 21 / 25, JDKs from $JAVA21_HOME and $JAVA25_HOME), and
   - the version in fabric.mod.json / mods.toml / neoforge.mods.toml set to NEW_VERSION.
 Every other entry stays byte-identical. Only use it when VersionCompare (pure Java, no Minecraft classes) is the only
@@ -15,7 +15,7 @@ import zipfile
 
 OLD_DIR, OLD_V, NEW_V, OUT = sys.argv[1:5]
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(HERE, 'common/src/main/java/com/pokato/whatchanged/core/VersionCompare.java')
+SRC = os.path.join(HERE, 'shared/common/src/main/java/com/pokato/whatchanged/core/VersionCompare.java')
 ENTRY = 'com/pokato/whatchanged/core/VersionCompare.class'
 JDK = {17: os.environ.get('JAVA21_HOME', ''), 21: os.environ.get('JAVA21_HOME', ''), 25: os.environ.get('JAVA25_HOME', '')}
 MAJOR = {61: 17, 65: 21, 69: 25}

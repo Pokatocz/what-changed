@@ -8,9 +8,9 @@ version = project.mod_version
 group = 'com.pokato'
 base { archivesName = 'whatchanged-fabric-1.21.8-1.21.11' }
 
-sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../shims/c1215/src/main/java'; srcDir '../client121/src/main/java'; srcDir '../fabric-common/src/main/java' }
-sourceSets.main.resources { srcDir '../common/src/main/resources' }
-if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+sourceSets.main.java { srcDir '../../shared/common/src/main/java'; srcDir '../../shared/shims/c1215/src/main/java'; srcDir '../../shared/client121/src/main/java'; srcDir '../../shared/fabric-common/src/main/java' }
+sourceSets.main.resources { srcDir '../../shared/common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../../tools/selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
 
 repositories { mavenCentral() }
 
@@ -27,4 +27,4 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach { it.options.encoding = "UTF-8"; it.options.release = 21 }
-jar { from('../LICENSE') }
+jar { from('../../LICENSE') }

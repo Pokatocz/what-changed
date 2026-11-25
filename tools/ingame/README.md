@@ -1,6 +1,6 @@
 # In-game test of the release JARs (used for 1.3.1, 22 Nov 2026)
 
-Tests the **real release JARs**: each test JAR is a release JAR plus the `selftest/` classes (the mod finds
+Tests the **real release JARs**: each test JAR is a release JAR plus the `tools/selftest/` classes (the mod finds
 `com.pokato.whatchanged.selftest.SelfTest` by reflection and runs it when `WCTEST_MODE` is set). Paths in the scripts
 come from the environment (`WCT` work dir, `MCMAIN` portablemc main dir, `MCJARS` mapped Minecraft jars).
 
@@ -13,7 +13,7 @@ come from the environment (`WCT` work dir, `MCMAIN` portablemc main dir, `MCJARS
 3. Minecraft names for compiling the selftest: `pg2tiny.py client.txt moj.tiny` (Mojang ProGuard mappings → tiny),
    tiny-remapper `official → named`; for Fabric ≤ 1.21.11 merge with intermediary, for Forge 1.20.1 with MCPConfig
    `joined.tsrg` (`../mergemaps.py`). 26.x is not obfuscated.
-4. Compile `common/` + `selftest/` against the named jar (`cp.py <version>` prints the library classpath), keep the
+4. Compile `shared/common/` + `tools/selftest/` against the named jar (`cp.py <version>` prints the library classpath), keep the
    `selftest` classes, remap them to the runtime names (intermediary for Fabric ≤ 1.21.11, SRG for Forge 1.20.1 and the
    NeoForge 1.20.1 fork, named for the rest) and `addst.py release.jar selftest.jar test.jar`.
 

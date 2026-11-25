@@ -3,15 +3,15 @@ plugins {
     id 'net.minecraftforge.gradle' version '[7.0.38,8)'
 }
 // Forge 58 (1.21.8) - 66 (26.3) in one JAR. Compiled against the oldest (58.x, Java 21); the 26.x GUI layer
-// (client26) is compiled separately against 26.1 at Java 21 bytecode by ../build-client26.sh and packed in.
+// (client26) is compiled separately against 26.1 at Java 21 bytecode by ../../tools/build-client26.sh and packed in.
 version = project.mod_version
 group = 'com.pokato'
 base { archivesName = 'whatchanged-forge-1.21.8-26.3' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-sourceSets.main.java { srcDir '../common/src/main/java'; srcDir '../shims/c1215/src/main/java'; srcDir '../client121/src/main/java' }
-sourceSets.main.resources { srcDir '../common/src/main/resources' }
-if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
+sourceSets.main.java { srcDir '../../shared/common/src/main/java'; srcDir '../../shared/shims/c1215/src/main/java'; srcDir '../../shared/client121/src/main/java' }
+sourceSets.main.resources { srcDir '../../shared/common/src/main/resources' }
+if (project.hasProperty('selftest')) { sourceSets.main.java { srcDir '../../tools/selftest/src/main/java' }; base.archivesName = base.archivesName.get() + '-SELFTEST' }
 
 minecraft {
     mappings channel: 'official', version: '1.21.8'
@@ -41,6 +41,6 @@ processResources {
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
 
 jar {
-    from('../LICENSE')
-    from('../client26/build/classes') // 26.x renderer layer
+    from('../../LICENSE')
+    from('../../shared/client26/build/classes') // 26.x renderer layer
 }
